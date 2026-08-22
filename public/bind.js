@@ -136,7 +136,6 @@ function buildRows(bindings) {
       if (keyHandler) window.removeEventListener('keydown', keyHandler, true);
       keyHandler = null;
       capBtn.classList.remove('armed');
-      capBtn.textContent = 'Capture';
       armed = false;
       capturing = null;
     };
@@ -149,7 +148,7 @@ function buildRows(bindings) {
       armed = true;
       capturing = { disarm };
       capBtn.classList.add('armed');
-      capBtn.textContent = 'Press a key… (5s)';
+      flash('Press a key…', '');
       keyHandler = (e) => {
         e.preventDefault();
         disarm();
