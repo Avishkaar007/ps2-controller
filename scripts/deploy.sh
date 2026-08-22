@@ -14,8 +14,17 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-BUMP="${1:-patch}"
 REPO="Avishkaar007/ps2-controller"
+NO_PUSH=0
+BUMP="patch"
+# Parse args: --no-push builds executables locally WITHOUT commit/push/release.
+# First non-flag arg is the version bump (patch | minor | major; default patch).
+for a in "$@"; do
+  case "$a" in
+    --no-push) NO_PUSH=1 ;;
+    patch|minor|major) BUMP="$a" ;;
+  esac
+done
 
 echo "==> Installing dependencies"
 npm ci
@@ -43,8 +52,15 @@ for a in "${ASSETS[@]}"; do
 done
 
 # Commit any pending source changes so `npm version` can tag on a clean tree.
+if [ "$NO_PUSH" -eq 1 ]; then
+  echo "==> --no-push: executables built in dist/; skipping commit/bump/push/release."
+  echo "    Assets ready:"
+  for a in "${ASSETS[@]}"; do echo "      $a"; done
+  exit 0
+fi
+
 if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "==> Committing pending changes"
+  echo "==> Committing... (prepare release)"
   git add -A
   git commit -m "chore: prepare release"
 fi

@@ -9,6 +9,7 @@
     "build:mac": "pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path dist",
     "build:win": "pkg . --targets node18-win-x64 --out-path dist",
     "make-dmg": "bash scripts/make-dmg.sh",
+    "build:all": "bash scripts/deploy.sh --no-push",
     "deploy": "bash scripts/deploy.sh"
   },
   "bin": {

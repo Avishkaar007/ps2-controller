@@ -28,6 +28,24 @@ npm install
 npm start
 ```
 
+## Building & releasing
+
+All executables (macOS Apple Silicon, macOS Intel, Windows) are built **fresh from
+source every time**, so a release never ships stale binaries. `dist/` is
+git-ignored, so nothing binary gets committed.
+
+```bash
+npm run build:all   # build all executables + .dmg locally, NO commit/push/release
+npm run deploy      # full release: build -> commit -> version bump -> push -> GitHub release
+```
+
+- `npm run build:all` is for when you just want the binaries in `dist/` to test
+  (e.g. the Windows build you can't test yet) without touching git or GitHub.
+- `npm run deploy` does everything and creates the GitHub release with clearly
+  named assets (`PS2Remote-Apple-Silicon.dmg`, `PS2Remote-Intel.dmg`,
+  `PS2Remote-macOS-Apple-Silicon`, `PS2Remote-macOS-Intel`, `PS2Remote-Windows.exe`).
+  Pass `minor`/`major` to change the bump, e.g. `npm run deploy -- minor`.
+
 The terminal prints a QR code and two URLs:
 
 | URL                            | Purpose                                  |
