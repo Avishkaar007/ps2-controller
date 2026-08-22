@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PS2 Remote — Key Bindings</title>
+  <link rel="stylesheet" href="bind.css" />
+</head>
+<body>
+  <main>
+    <h1>PS2 Remote — Key Bindings</h1>
+    <p class="sub">
+      Click <b>Capture</b> next to a control, then press the key you want on your Mac's keyboard.
+      Changes apply instantly to the running server. Mirror them in PCSX2.
+    </p>
+
+    <div class="actions">
+      <button id="resetBtn">Reset to defaults</button>
+      <span id="msg"></span>
+    </div>
+
+    <table id="grid">
+      <thead>
+        <tr><th>Control</th><th>Current key</th><th>Capture</th><th>Or pick</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <p class="foot">
+      Tip: these are macOS key <i>codes</i>. Bind the same physical keys in
+      PCSX2 (Settings → Controllers → Game Pad). The phone controller sends the
+      control name; the Mac turns it into this key.
+    </p>
+  </main>
+
+  <script src="bind.js"></script>
+</body>
+</html>

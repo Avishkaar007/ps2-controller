@@ -1,0 +1,41 @@
+// macOS key injection via AppleScript `System Events` (the original approach).
+//
+// Buttons arrive as macOS virtual key codes (the numbers in config.js KEYMAP).
+// Each press/release spawns a short `osascript` that does `key down <code>` /
+// `key up <code>`. Simple and reliable for normal play — the joystick sends a
+// direction once and the server ignores duplicates, so keys are not repeated.
+
+import { spawn } from 'node:child_process';
+import { TARGET_APP } from './config.js';
+
+const APP = process.env.PCSX2_APP || TARGET_APP;
+
+// Bring PCSX2 (or the configured app) to the front so injected keys land there.
+export function focusApp(app = APP) {
+  try {
+    spawn('osascript', ['-e', `tell application "${app}" to activate`], { stdio: 'ignore' });
+  } catch {
+    /* ignore */
+  }
+}
+
+export function sendKey(code, down) {
+  if (code === undefined || code === null) return;
+  const verb = down ? 'down' : 'up';
+  try {
+    spawn(
+      'osascript',
+      ['-e', `tell application "System Events"\nkey ${verb} ${code}\nend tell`],
+      { stdio: 'ignore' }
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+export function releaseAll(codes = []) {
+  for (const c of codes) sendKey(c, false);
+}
+
+export function initInput() {}
+export function closeInput() {}

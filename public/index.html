@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>PS2 Remote</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="overlay">
+    <div class="ov-card">
+      <h1>PS2 Remote</h1>
+      <p>Use your phone as a PS2 controller for PCSX2.</p>
+      <button id="startBtn">TAP TO START</button>
+      <p class="hint">Enters fullscreen &amp; connects</p>
+    </div>
+  </div>
+
+  <div id="status">Not connected</div>
+
+  <!-- Shown whenever the phone is in portrait (controller is landscape-only) -->
+  <div id="rotateScreen">
+    <div class="rot-phone"></div>
+    <p>Rotate your phone to <b>landscape</b> to play.<br />Tapping START also tries to rotate automatically.</p>
+  </div>
+
+  <!-- Appears only when NOT in fullscreen (e.g. after swiping up on Android) -->
+  <button id="fsBtn">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+    <span>Fullscreen</span>
+  </button>
+
+  <!-- Fixed design-size gamepad; positions/sizes loaded from /api/layout -->
+  <div id="gamepad">
+    <button class="sh widget" id="l2" data-key="l2">L2</button>
+    <button class="sh widget" id="l1" data-key="l1">L1</button>
+    <button class="sh widget" id="r1" data-key="r1">R1</button>
+    <button class="sh widget" id="r2" data-key="r2">R2</button>
+
+    <!-- Top cluster: SELECT, START, Edit -->
+    <div id="topCluster">
+      <button class="cbtn" id="select" data-key="select">SELECT</button>
+      <button class="cbtn" id="start"  data-key="start">START</button>
+      <button id="editBtn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>Edit</span>
+      </button>
+    </div>
+
+    <div class="stick widget" id="stickL"><div class="knob"></div></div>
+
+    <div class="dpad widget" id="dpad">
+      <button class="dbtn up"    data-key="dpad_up">▲</button>
+      <button class="dbtn left"  data-key="dpad_left">◀</button>
+      <button class="dbtn right" data-key="dpad_right">▶</button>
+      <button class="dbtn down"  data-key="dpad_down">▼</button>
+      <div class="dpad-center"></div>
+    </div>
+
+    <div class="face widget" id="face">
+      <button class="fbtn tri" data-key="triangle">△</button>
+      <button class="fbtn sq"  data-key="square">□</button>
+      <button class="fbtn cir" data-key="circle">○</button>
+      <button class="fbtn cro" data-key="cross">✕</button>
+    </div>
+
+    <div class="stick widget" id="stickR"><div class="knob"></div></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
