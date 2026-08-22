@@ -76,6 +76,9 @@ function labelFor(code) {
 const rows = document.getElementById('rows');
 const msg = document.getElementById('msg');
 
+// Ensures only one control is capturing a key at a time.
+let capturing = null;
+
 function flash(text, kind) {
   msg.textContent = text;
   msg.className = kind || '';
@@ -135,10 +138,16 @@ function buildRows(bindings) {
       capBtn.classList.remove('armed');
       capBtn.textContent = 'Capture';
       armed = false;
+      capturing = null;
     };
     const arm = () => {
+      if (capturing) {
+        flash('Finish the current capture first', 'err');
+        return;
+      }
       if (armed) return;
       armed = true;
+      capturing = { disarm };
       capBtn.classList.add('armed');
       capBtn.textContent = 'Press a key… (5s)';
       keyHandler = (e) => {
