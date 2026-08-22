@@ -38,6 +38,16 @@ select {
   border-radius: 8px; padding: 7px 8px; min-width: 150px;
 }
 .foot { margin-top: 22px; opacity: 0.6; font-size: 0.85rem; line-height: 1.5; }
+.warn {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  color: #fde68a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
 .gh { margin-top: 28px; text-align: center; }
 .gh a {
   display: inline-block;
