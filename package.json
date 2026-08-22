@@ -1,6 +1,6 @@
 {
   "name": "ps2-remote",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Use your phone as a PS2 controller; your MacBook drives PCSX2",
   "scripts": {
@@ -15,9 +15,17 @@
     "ps2remote": "server/index.js"
   },
   "pkg": {
-    "scripts": ["server/index.js"],
-    "assets": ["public/**/*"],
-    "targets": ["node18-macos-x64", "node18-macos-arm64", "node18-win-x64"],
+    "scripts": [
+      "server/index.js"
+    ],
+    "assets": [
+      "public/**/*"
+    ],
+    "targets": [
+      "node18-macos-x64",
+      "node18-macos-arm64",
+      "node18-win-x64"
+    ],
     "outputPath": "dist"
   },
   "dependencies": {
