@@ -6,15 +6,20 @@ Your Mac runs a small local server that prints a **QR code**, serves a
 full-screen **PlayStation-style controller** to your phone, receives input over
 WebSocket, and injects it as keystrokes into PCSX2.
 
-> Windows support is planned — `server/input.js` is the only platform-specific
-> piece, so a Windows build mainly needs a different key injector there.
+> **Windows beta (untested):** A Windows build (`PS2Remote-Windows.exe`) is included
+> in releases, but the author cannot test it on Windows. The server, QR, and phone
+> controller work cross-platform; however **key injection is macOS-only right now**,
+> so on Windows the controller connects but won't send keys until a Windows key
+> injector is added to `server/input.js`. If you try it, please report what
+> happens so we can finish Windows support.
 
 ## Requirements
 
-- macOS (Apple Silicon or Intel)
-- Node.js 18+
-- [PCSX2](https://pcsx2.net) running on the Mac, kept as the frontmost window
-- Phone (Android or iOS) on the **same Wi-Fi** as the Mac
+- **macOS** (Apple Silicon or Intel) — fully supported
+- **Windows** — beta/untested; build provided but key injection not yet implemented
+- Node.js 18+ (only for source installs; the release binaries bundle Node)
+- [PCSX2](https://pcsx2.net) running on the Mac, kept as the frontmost window (macOS only for now)
+- Phone (Android or iOS) on the **same Wi-Fi** as the host
 
 ## Install & run
 

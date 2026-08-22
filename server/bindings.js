@@ -1,19 +1,20 @@
 // Live, editable key bindings.
 // Default bindings come from config.js; any saved overrides live in
-// server/bindings.json (so they persist across restarts).
+// ~/.ps2-remote/bindings.json (so they persist across restarts and work even
+// when the app is packaged, since the binary's own directory is read-only).
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { KEYMAP as DEFAULTS } from './config.js';
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { KEYMAP: DEFAULTS } = require('./config.js');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FILE = path.join(__dirname, 'bindings.json');
+const DATA_DIR = path.join(os.homedir(), '.ps2-remote');
+const FILE = path.join(DATA_DIR, 'bindings.json');
 
 // `bindings` is a mutable module-level object so getCode() always reads live state.
 let bindings = { ...DEFAULTS };
 
-export function loadBindings() {
+function loadBindings() {
   try {
     if (fs.existsSync(FILE)) {
       const data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
@@ -25,22 +26,22 @@ export function loadBindings() {
   return bindings;
 }
 
-export function getBindings() {
+function getBindings() {
   return { ...bindings };
 }
 
-export function getCode(name) {
+function getCode(name) {
   return bindings[name];
 }
 
-export function setBinding(button, code) {
+function setBinding(button, code) {
   if (!(button in DEFAULTS)) return false;
   bindings[button] = code;
   save();
   return true;
 }
 
-export function resetBindings() {
+function resetBindings() {
   bindings = { ...DEFAULTS };
   try {
     fs.unlinkSync(FILE);
@@ -52,8 +53,11 @@ export function resetBindings() {
 
 function save() {
   try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(FILE, JSON.stringify(bindings, null, 2));
   } catch (e) {
     console.warn('[bindings] save failed:', e.message);
   }
 }
+
+module.exports = { loadBindings, getBindings, getCode, setBinding, resetBindings };

@@ -1,16 +1,17 @@
 // Editable on-screen layout (positions/sizes of every control), in design units.
-// Defaults match the 760x380 design canvas; saved overrides live in layout.json.
+// Defaults match the 760x380 design canvas; saved overrides live in
+// ~/.ps2-remote/layout.json (writable even when packaged).
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FILE = path.join(__dirname, 'layout.json');
+const DATA_DIR = path.join(os.homedir(), '.ps2-remote');
+const FILE = path.join(DATA_DIR, 'layout.json');
 
-export const DESIGN = { w: 760, h: 380 };
+const DESIGN = { w: 760, h: 380 };
 
-export const DEFAULT_LAYOUT = {
+const DEFAULT_LAYOUT = {
   l2:     { x: 40,  y: 8,   w: 84,  h: 46 },
   l1:     { x: 140, y: 8,   w: 84,  h: 46 },
   r1:     { x: 536, y: 8,   w: 84,  h: 46 },
@@ -25,7 +26,7 @@ export const DEFAULT_LAYOUT = {
 
 let layout = { ...DEFAULT_LAYOUT };
 
-export function loadLayout() {
+function loadLayout() {
   try {
     if (fs.existsSync(FILE)) {
       const data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
@@ -37,11 +38,11 @@ export function loadLayout() {
   return layout;
 }
 
-export function getLayout() {
+function getLayout() {
   return { ...layout };
 }
 
-export function setLayout(next) {
+function setLayout(next) {
   const merged = {};
   for (const id of Object.keys(DEFAULT_LAYOUT)) {
     merged[id] = next && next[id] ? next[id] : layout[id];
@@ -51,7 +52,7 @@ export function setLayout(next) {
   return layout;
 }
 
-export function resetLayout() {
+function resetLayout() {
   layout = { ...DEFAULT_LAYOUT };
   try {
     fs.unlinkSync(FILE);
@@ -63,8 +64,11 @@ export function resetLayout() {
 
 function save() {
   try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(FILE, JSON.stringify(layout, null, 2));
   } catch (e) {
     console.warn('[layout] save failed:', e.message);
   }
 }
+
+module.exports = { DESIGN, loadLayout, getLayout, setLayout, resetLayout };

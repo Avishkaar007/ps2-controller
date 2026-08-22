@@ -1,4 +1,5 @@
 node_modules/
+dist/
 server/bindings.json
 server/layout.json
 *.log

@@ -1,29 +1,34 @@
-import http from 'node:http';
-import fs from 'node:fs';
-import path from 'node:path';
-import { spawn } from 'node:child_process';
-import os from 'node:os';
-import { fileURLToPath } from 'node:url';
-import { WebSocketServer } from 'ws';
-import QRCode from 'qrcode';
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const { spawn } = require('node:child_process');
+const { WebSocketServer } = require('ws');
+const QRCode = require('qrcode');
 
-import { PORT, TARGET_APP, AXIS_THRESHOLD, AUTOFIRE } from './config.js';
-import {
+const { PORT, TARGET_APP, AXIS_THRESHOLD, AUTOFIRE } = require('./config.js');
+const {
   loadBindings,
   getBindings,
   getCode,
   setBinding,
   resetBindings,
-} from './bindings.js';
-import {
+} = require('./bindings.js');
+const {
   loadLayout,
   getLayout,
   setLayout,
   resetLayout,
-} from './layout.js';
-import { sendKey, focusApp, releaseAll, initInput, closeInput } from './input.js';
+} = require('./layout.js');
+const {
+  sendKey,
+  focusApp,
+  releaseAll,
+  initInput,
+  closeInput,
+  IS_MAC,
+} = require('./input.js');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
 const MIME = {
@@ -171,6 +176,7 @@ const TAP_HOLD = 0.012; // seconds the key is held down per tap
 const TAP_BATCH = 4;    // taps per osascript call (amortizes spawn overhead)
 
 function tapOnce(code) {
+  if (!IS_MAC) return Promise.resolve(); // injection is a no-op off macOS
   let body = '';
   for (let i = 0; i < TAP_BATCH; i++) {
     body += `key down ${code}\ndelay ${TAP_HOLD}\nkey up ${code}\n`;
@@ -195,6 +201,7 @@ async function autofireLoop(button, code, ctrl) {
 }
 
 function startAutofire(button, code) {
+  if (!IS_MAC) return; // nothing to mash off macOS
   const ctrl = { stop: false };
   autofireActive.set(button, ctrl);
   autofireLoop(button, code, ctrl).catch((err) => {

@@ -4,26 +4,26 @@
 // key codes. Replicate the SAME bindings inside PCSX2 (LilyPad / Game Pad
 // configuration) so the emulator reacts to these keys.
 
-export const PORT = Number(process.env.PORT) || 8080;
+const PORT = Number(process.env.PORT) || 8080;
 
 // Name of the PCSX2 app as it appears in macOS (used to bring it to front).
 // If you run a versioned build, set PCSX2_APP env var, e.g. "PCSX2 1.7.0".
-export const TARGET_APP = process.env.PCSX2_APP || 'PCSX2';
+const TARGET_APP = process.env.PCSX2_APP || 'PCSX2';
 
 // How far an analog stick must be pushed (0..1) before it counts as a press.
-export const AXIS_THRESHOLD = 0.6;
+const AXIS_THRESHOLD = 0.6;
 
 // Buttons that auto-repeat (mash) while held, so a single hold = many taps.
 // Comma-separated button names; override with the AUTOFIRE env var.
 // Currently Circle, Square, Cross and Triangle mash while held.
-export const AUTOFIRE = (process.env.AUTOFIRE || 'circle,square,cross,triangle')
+const AUTOFIRE = (process.env.AUTOFIRE || 'circle,square,cross,triangle')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
 
 // macOS key codes (decimal). Find more at:
 // https://developer.apple.com/macosx/technotes/tn/tn2450.html
-export const KEYMAP = {
+const KEYMAP = {
   // Face buttons (PCSX2 defaults)
   cross:    40,  // K
   square:   38,  // J
@@ -45,8 +45,8 @@ export const KEYMAP = {
   r3: 21,  // 4
 
   // Center
-  start:  36,  // Return
-  select: 51,  // Backspace
+  start:   36,  // Return
+  select:  51,  // Backspace
 
   // Left analog stick -> WASD
   lstick_up:    13, // w
@@ -61,3 +61,5 @@ export const KEYMAP = {
   rstick_left:  43, // comma
   rstick_right: 47, // period
 };
+
+module.exports = { PORT, TARGET_APP, AXIS_THRESHOLD, AUTOFIRE, KEYMAP };
