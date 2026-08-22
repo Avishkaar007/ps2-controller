@@ -9,15 +9,17 @@ WebSocket, and injects it as keystrokes into PCSX2.
 > **Windows beta (untested):** A Windows build can be produced locally with
 > `npm run build:all` (it outputs `dist/PS2Remote-Windows.exe`), but the author
 > cannot test it on Windows. The server, QR, and phone controller work
-> cross-platform; however **key injection is macOS-only right now**, so on Windows
-> the controller connects but won't send keys until a Windows key injector is added
-> to `server/input.js`. If you try it, please report what happens so we can finish
-> Windows support.
+> cross-platform. A Windows key injector **is now included** in `server/input.js`
+> (backed by `server/win-inject.js`, which uses PowerShell + the Win32 `SendInput`
+> API with hardware scan codes). It is wired in but **unverified** — on Windows the
+> controller should connect *and* send keys, but please report what happens so we
+> can confirm/fix the mapping. If injection ever fails to load, the controller
+> still connects but won't send keys.
 
 ## Requirements
 
 - **macOS** (Apple Silicon or Intel) — fully supported
-- **Windows** — beta/untested; build provided but key injection not yet implemented
+- **Windows** — beta/untested; build runs and a key injector is included but not yet verified on a real machine
 - Node.js 18+ (only for source installs; the release binaries bundle Node)
 - [PCSX2](https://pcsx2.net) running on the Mac, kept as the frontmost window (macOS only for now)
 - Phone (Android or iOS) on the **same Wi-Fi** as the host
@@ -66,6 +68,25 @@ Key injection uses AppleScript `System Events`. Grant it once:
 **System Settings → Privacy & Security → Accessibility → +** and add the app you
 run `node` from (Terminal, iTerm, or your IDE). Without this, keystrokes won't
 reach PCSX2. If a firewall blocks incoming connections, allow port `8080`.
+
+## Windows (beta, untested)
+
+The Windows build runs the same server and serves the phone controller, but key
+injection is handled differently — and has **not been verified on a real Windows
+machine** by the author.
+
+- Injection lives in `server/win-inject.js`, called from `server/input.js` when
+  running on `win32`. It shells out to `powershell.exe` and calls the Win32
+  `SendInput` API with **hardware scan codes** (so it should reach games that
+  read raw input, not just window messages).
+- The macOS key codes in `server/config.js` (`KEYMAP`) are translated to Windows
+  scan codes by the `MAC_TO_WIN_SCAN` table in `server/win-inject.js`. **If you
+  add or change a binding in `KEYMAP`, add the matching scan code there too**, or
+  that button won't send keys on Windows.
+- `focusApp()` uses `WScript.Shell.AppActivate` to bring the PCSX2 window forward.
+
+If a button does nothing on Windows, check `MAC_TO_WIN_SCAN` and confirm the
+`powershell.exe` `SendInput` call works on your system, then report back.
 
 ## Autofire (hold to mash)
 
