@@ -6,12 +6,13 @@ Your Mac runs a small local server that prints a **QR code**, serves a
 full-screen **PlayStation-style controller** to your phone, receives input over
 WebSocket, and injects it as keystrokes into PCSX2.
 
-> **Windows beta (untested):** A Windows build (`PS2Remote-Windows.exe`) is included
-> in releases, but the author cannot test it on Windows. The server, QR, and phone
-> controller work cross-platform; however **key injection is macOS-only right now**,
-> so on Windows the controller connects but won't send keys until a Windows key
-> injector is added to `server/input.js`. If you try it, please report what
-> happens so we can finish Windows support.
+> **Windows beta (untested):** A Windows build can be produced locally with
+> `npm run build:all` (it outputs `dist/PS2Remote-Windows.exe`), but the author
+> cannot test it on Windows. The server, QR, and phone controller work
+> cross-platform; however **key injection is macOS-only right now**, so on Windows
+> the controller connects but won't send keys until a Windows key injector is added
+> to `server/input.js`. If you try it, please report what happens so we can finish
+> Windows support.
 
 ## Requirements
 
@@ -31,20 +32,19 @@ npm start
 ## Building & releasing
 
 All executables (macOS Apple Silicon, macOS Intel, Windows) are built **fresh from
-source every time**, so a release never ships stale binaries. `dist/` is
-git-ignored, so nothing binary gets committed.
+source every time**, so a build never ships stale binaries. `dist/` is
+git-ignored, so nothing binary gets committed or uploaded — **there are no GitHub
+Releases**; binaries stay local in `dist/` for you to test/distribute yourself.
 
 ```bash
-npm run build:all   # build all executables + .dmg locally, NO commit/push/release
-npm run deploy      # full release: build -> commit -> version bump -> push -> GitHub release
+npm run build:all   # build all executables + .dmg locally, NO commit/push
+npm run deploy      # build -> commit -> push source to GitHub (no release)
 ```
 
 - `npm run build:all` is for when you just want the binaries in `dist/` to test
   (e.g. the Windows build you can't test yet) without touching git or GitHub.
-- `npm run deploy` does everything and creates the GitHub release with clearly
-  named assets (`PS2Remote-Apple-Silicon.dmg`, `PS2Remote-Intel.dmg`,
-  `PS2Remote-macOS-Apple-Silicon`, `PS2Remote-macOS-Intel`, `PS2Remote-Windows.exe`).
-  Pass `minor`/`major` to change the bump, e.g. `npm run deploy -- minor`.
+- `npm run deploy` builds, then commits and pushes the **source** to GitHub. It
+  does NOT create a GitHub Release or upload any binaries.
 
 The terminal prints a QR code and two URLs:
 
