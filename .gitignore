@@ -2,6 +2,7 @@ node_modules/
 dist/
 server/bindings.json
 server/layout.json
+.server.pid
 *.log
 npm-debug.log*
 .DS_Store

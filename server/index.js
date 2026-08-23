@@ -2,7 +2,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
-const { spawn } = require('node:child_process');
+const { spawn, execSync } = require('node:child_process');
 const { WebSocketServer } = require('ws');
 const QRCode = require('qrcode');
 
@@ -320,23 +320,60 @@ function shutdown() {
   stopAllAutofire();
   releaseAll([...held]);
   closeInput();
+  removePidFile();
   process.exit(0);
 }
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-// Global safety nets: log instead of crashing.
+// Global safety nets: log instead of crashing. If we're going down, drop the
+// PID file so a later `npm start` won't try to kill a dead process.
 process.on('uncaughtException', (err) => {
   console.error('[uncaught]', err.message);
+  removePidFile();
 });
 process.on('unhandledRejection', (reason) => {
   console.error('[unhandledRejection]', reason && reason.message ? reason.message : reason);
+  removePidFile();
 });
 
 // Friendly recovery if the port is already taken: auto-advance to the next free
 // port instead of crashing. Other errors are still fatal.
 let activePort = PORT;
 const MAX_PORT = PORT + 20;
+
+// Single-instance guard: a previous run that didn't shut down cleanly (crash,
+// force-quit, etc.) can keep the port occupied, which made new `npm start`
+// invocations collide and re-print the banner. We record our PID and, on
+// startup, terminate any stale instance still holding the port so it frees up.
+const PID_FILE = path.join(__dirname, '..', '.server.pid');
+
+function removePidFile() {
+  try {
+    fs.unlinkSync(PID_FILE);
+  } catch {
+    /* already gone */
+  }
+}
+
+function killStaleInstance() {
+  try {
+    if (!fs.existsSync(PID_FILE)) return;
+    const pid = parseInt(fs.readFileSync(PID_FILE, 'utf8').trim(), 10);
+    if (!Number.isNaN(pid) && pid !== process.pid) {
+      try {
+        process.kill(pid, 0); // throws if the process is not alive
+        console.log(`[init] Stopping stale server (pid ${pid})…`);
+        process.kill(pid, 'SIGTERM');
+      } catch {
+        /* already gone */
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  removePidFile();
+}
 
 // Render a URL as a terminal hyperlink (OSC 8) so it is clickable in iTerm2 /
 // VSCode / mintty. Terminals that don't support it just show the plain URL.
@@ -345,44 +382,55 @@ function link(u) {
 }
 
 function startServer() {
-  server.listen(activePort, '0.0.0.0', () => {
-    const ip = getLocalIP();
-    const base = `http://${ip}:${activePort}`;
-    const controllerUrl = base + '/';
-    const bindUrl = base + '/bind';
-
-    if (activePort !== PORT) {
-      console.log(`(Port ${PORT} was busy — using ${activePort} instead.)\n`);
-    }
-
-    console.log('\n=================================================');
-    console.log('  PS2 Remote server');
-    console.log('-------------------------------------------------');
-    console.log('  Connect phone (controller) : ' + link(controllerUrl));
-    console.log('  Map keys on laptop (/bind) : ' + link(bindUrl));
-    console.log('=================================================\n');
-
-    const printQR = (label, u) => {
-      QRCode.toString(u, { type: 'terminal', small: true }, (err, qr) => {
-        if (!err) {
-          console.log(label);
-          console.log(qr);
-          console.log('');
-        }
-      });
-    };
-
-    printQR('Scan to CONNECT phone controller:', controllerUrl);
-
-    console.log('On your laptop, open ' + link(bindUrl) + ' to map keys.');
-    console.log('On the phone controller, tap Edit to rearrange buttons.\n');
-  });
+  server.listen(activePort, '0.0.0.0');
 }
+
+// Banner handlers are attached exactly once. Attaching them inside the retry
+// loop would stack a new 'listening' listener on every failed attempt, so the
+// text + QR would print multiple times when the port has to advance.
+server.on('listening', () => {
+  try {
+    fs.writeFileSync(PID_FILE, String(process.pid));
+  } catch {
+    /* ignore */
+  }
+
+  const ip = getLocalIP();
+  const base = `http://${ip}:${activePort}`;
+  const controllerUrl = base + '/';
+  const bindUrl = base + '/bind';
+
+  if (activePort !== PORT) {
+    console.log(`(Port ${PORT} was busy — using ${activePort} instead.)\n`);
+  }
+
+  console.log('\n=================================================');
+  console.log('  PS2 Remote server');
+  console.log('-------------------------------------------------');
+  console.log('  Connect phone (controller) : ' + link(controllerUrl));
+  console.log('  Map keys on laptop (/bind) : ' + link(bindUrl));
+  console.log('=================================================\n');
+
+  const printQR = (label, u) => {
+    QRCode.toString(u, { type: 'terminal', small: true }, (err, qr) => {
+      if (!err) {
+        console.log(label);
+        console.log(qr);
+        console.log('');
+      }
+    });
+  };
+
+  printQR('Scan to CONNECT phone controller:', controllerUrl);
+
+  console.log('On your laptop, open ' + link(bindUrl) + ' to map keys.');
+  console.log('On the phone controller, tap Edit to rearrange buttons.\n');
+});
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE' && activePort < MAX_PORT) {
+    console.warn(`Port ${activePort} busy — trying ${activePort + 1}…`);
     activePort += 1;
-    console.warn(`Port ${activePort - 1} busy — trying ${activePort}…`);
     startServer();
   } else {
     console.error('\n✖ Server error:', err.message);
@@ -390,4 +438,7 @@ server.on('error', (err) => {
   }
 });
 
-startServer();
+// Terminate any stale instance left from a previous run, then wait briefly so
+// the OS releases the port before we bind to it.
+killStaleInstance();
+setTimeout(startServer, 600);
